@@ -1,0 +1,37 @@
+Fase 1: Definición del Alcance y Requerimientos
+Análisis del log de compilación COBOL/UNISYS
+Revisar el formato del log y los tipos de warnings que genera.
+Identificar patrones comunes en los mensajes de advertencia.
+Definir el nivel de detalle requerido en el reporte final.
+Especificación de clasificación de warnings
+Categorías posibles (Ejemplo: sintaxis, rendimiento, compatibilidad, obsolescencia).
+Asignación de severidad (bajo, medio, alto, crítico).
+Revisión de capacidades de GitHub Copilot
+Determinar cómo Copilot puede ayudar en la automatización del análisis del log.
+Definir el lenguaje de programación para la automatización (Python, Shell script, etc.).
+Fase 2: Desarrollo de la Solución
+Extracción y separación de los warnings
+Escribir un script para leer y filtrar los warnings del log.
+Validar que el script extraiga información relevante como línea de código, módulo, y descripción del warning.
+Clasificación y asignación de severidad
+Implementar reglas o patrones para categorizar warnings.
+Asignar niveles de severidad según criterios definidos.
+Generación del reporte de recomendaciones
+Relacionar cada categoría de warning con posibles soluciones o buenas prácticas.
+Sugerir tipos de pruebas necesarias para cada caso (unitarias, de regresión, etc.).
+Formatear el reporte en un formato estructurado (CSV, JSON, o PDF).
+Fase 3: Pruebas y Ajustes
+Ejecución en logs de prueba
+Usar logs de compilación reales para validar la precisión del análisis.
+Ajustar reglas y patrones según sea necesario.
+Optimización y documentación
+Refinar el código para mejorar eficiencia y precisión.
+Documentar el proceso y uso de la herramienta.
+Fase 4: Implementación y Validación Final
+Integración con flujo de trabajo
+Evaluar la posibilidad de automatizar el análisis dentro del proceso de compilación.
+Considerar integración con herramientas de CI/CD si aplica.
+Presentación del informe final
+Revisar el formato del reporte con los interesados.
+Evaluar impacto y precisión de las recomendaciones.
+ 
