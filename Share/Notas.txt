@@ -1,37 +1,50 @@
-Fase 1: Definición del Alcance y Requerimientos
-Análisis del log de compilación COBOL/UNISYS
-Revisar el formato del log y los tipos de warnings que genera.
-Identificar patrones comunes en los mensajes de advertencia.
-Definir el nivel de detalle requerido en el reporte final.
-Especificación de clasificación de warnings
-Categorías posibles (Ejemplo: sintaxis, rendimiento, compatibilidad, obsolescencia).
-Asignación de severidad (bajo, medio, alto, crítico).
-Revisión de capacidades de GitHub Copilot
-Determinar cómo Copilot puede ayudar en la automatización del análisis del log.
-Definir el lenguaje de programación para la automatización (Python, Shell script, etc.).
-Fase 2: Desarrollo de la Solución
-Extracción y separación de los warnings
-Escribir un script para leer y filtrar los warnings del log.
-Validar que el script extraiga información relevante como línea de código, módulo, y descripción del warning.
-Clasificación y asignación de severidad
-Implementar reglas o patrones para categorizar warnings.
-Asignar niveles de severidad según criterios definidos.
-Generación del reporte de recomendaciones
-Relacionar cada categoría de warning con posibles soluciones o buenas prácticas.
-Sugerir tipos de pruebas necesarias para cada caso (unitarias, de regresión, etc.).
-Formatear el reporte en un formato estructurado (CSV, JSON, o PDF).
-Fase 3: Pruebas y Ajustes
-Ejecución en logs de prueba
-Usar logs de compilación reales para validar la precisión del análisis.
-Ajustar reglas y patrones según sea necesario.
-Optimización y documentación
-Refinar el código para mejorar eficiencia y precisión.
-Documentar el proceso y uso de la herramienta.
-Fase 4: Implementación y Validación Final
-Integración con flujo de trabajo
-Evaluar la posibilidad de automatizar el análisis dentro del proceso de compilación.
-Considerar integración con herramientas de CI/CD si aplica.
-Presentación del informe final
-Revisar el formato del reporte con los interesados.
-Evaluar impacto y precisión de las recomendaciones.
+INSTALAR VERSIÓN DE IBM COBOL DE PRUEBA TRIAD en 9.5
  
+1.- Aplicar comando para resolver temas de dependencias
+    + Command 1: sudo dnf install gcc glibc tar gzip glibc-devel libgcc libstdc++ perl -y
+2.- Renombrar archivo original IBM_COBOL_V1.2.0_LINUX_EVAL.x86-64.241122.tar.gz por IBM_COBOL.tar.gz
+3.- crear subcarpeta tar dentro de ruta /opt/ en equipo Rocky-9.5
+4.- Copiar tar.gz de equipo a ruta /opt/tar
+5.- aplicar comando de descompresión dentro de la carpeta tar
+    + Command 2: tar -xvzf package_name.tar.gz
+6.- y aplicar comando de instalación dentro de la carpeta tar
+    + Command 3: sudo ./install
+7.- validar al terminar que haya terminado correctamente    
+    + por el mensaje : Installation and configuration successful
+    + Se genera archivo de configuración.
+      Su ubicación es /opt/ibm/cobol/1.2.0/etc/cob2.cfg.
+    + También se crea un enlace simbólico en el directorio
+       /opt/ibm/cobol/1.2.0/etc.d, que apunta al archivo cob2.cfg.
+    + Consulta de paquetes instalados
+      Command 4: rpm -qa cobol.cmp.1.2.0
+    + Configuración de variables de entorno Antes de utilizar el compilador, de que variables de entorno
+      LANG, MANPATH, NLSPATH y PATH estén establecidas.
+      Para determinar la configuración actual de estas variables, utilice este comando:
+      Command 5: echo "\n $LANG \n\n $NLSPATH \n\n $MANPATH \n\n $PATH"
+    + Especifica la ruta de acceso de búsqueda de directorios para los archivos ejecutables del compilador
+      añada el siguiente directorio a la variable de entorno PATH introduciendo este comando: 
+      Command 6: export PATH=$PATH:/opt/ibm/cobol/1.2.0/bin:/opt/ibm/cobol/rte/bin:/opt/ibm/cobol/debug/usr/bin
++ Crear programa y compilar
+ 
+  Command 7: vi hello.cbl
+  
+  Teclear:
+  
+000100 IDENTIFICATION DIVISION.
+000200 PROGRAM-ID. HELLO.
+000300 AUTHOR. JOE PROGRAMMER.
+000400 ENVIRONMENT DIVISION.
+000500 DATA DIVISION.
+000600 PROCEDURE DIVISION.
+000700 MAINLINE.
+000800 DISPLAY 'Hello World!'.
+000900 STOP RUN.
+ 
+Presiona Esc para asegurarte de que no estás en modo de inserción.
+Escribe :wq y presiona Enter para guardar y salir.
+ 
+    + Compile el programa de prueba. Con los comandos de invocación cortos
+      Command 8: cob2 hello.cbl -o hello
+      
+    + 3. Ejecute el programa: 
+      Command 9: ./hello
