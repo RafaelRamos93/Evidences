@@ -7,7 +7,7 @@ SALIDA_JSON="reporte_warningsV5.json"
 # Expresión regular para detectar warnings con número (ejemplo: WARNING 301: mensaje)
 PATRON_WARNING="(WARNING|Warning|warning) ([0-9]+) : (.+)"
 # Expresión regular para detectar fin del mensaje (6 dígitos numéricos al inicio o línea que empieza con *)
-PATRON_FIN="^[0-9]{6}|^\*"
+PATRON_FIN="^[[:space:]]*([0-9]{6}|\*)"
 
 # Inicializar estructura JSON
 echo "{" > "$SALIDA_JSON"
@@ -38,8 +38,9 @@ for archivo in "$DIRECTORIO"/*.txt; do
         LINE_NUM=0
         while IFS= read -r linea || [[ -n "$linea" ]]; do
             ((LINE_NUM++))  # Contador de línea
+            LINEA_LIMPIA="$(echo "$linea" | sed 's/^[[:space:]]*//')"  # Eliminar espacios iniciales
 
-            if [[ "$linea" =~ $PATRON_WARNING ]]; then
+            if [[ "$LINEA_LIMPIA" =~ $PATRON_WARNING ]]; then
                 # Si ya estábamos leyendo un warning, guardamos el anterior
                 if [[ $LEYENDO_WARNING -eq 1 ]]; then
                     WARNINGS_JSON+="        { \"linea\": $LINEA_INICIO, \"categoria\": \"$CATEGORIA_ACTUAL\", \"mensaje\": \"$(echo -e "$MENSAJE_WARNING" | sed ':a;N;$!ba;s/\n/\\n/g')\" },\n"
@@ -55,8 +56,8 @@ for archivo in "$DIRECTORIO"/*.txt; do
                 MENSAJE_WARNING="${BASH_REMATCH[3]}"
             
             elif [[ $LEYENDO_WARNING -eq 1 ]]; then
-                # Si encontramos el patrón de fin, terminamos este warning
-                if [[ "$linea" =~ $PATRON_FIN ]]; then
+                # Si encontramos el patrón de fin (ignorando espacios al inicio), terminamos este warning
+                if [[ "$LINEA_LIMPIA" =~ $PATRON_FIN ]]; then
                     WARNINGS_JSON+="        { \"linea\": $LINEA_INICIO, \"categoria\": \"$CATEGORIA_ACTUAL\", \"mensaje\": \"$(echo -e "$MENSAJE_WARNING" | sed ':a;N;$!ba;s/\n/\\n/g')\" },\n"
                     ((WARNINGS_POR_CATEGORIA["$CATEGORIA_ACTUAL"]++))
                     ((TOTAL_WARNINGS++))
