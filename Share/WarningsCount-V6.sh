@@ -8,7 +8,7 @@ DIRECTORIO="${1:-$(pwd)}"
 SALIDA_JSON="reporte_warnings.json"
 
 # Expresión regular para detectar warnings con número (ejemplo: WARNING 301: mensaje)
-PATRON_WARNING="(WARNING|Warning|warning) ([0-9]+) : (.+)"
+PATRON_WARNING="(WARNING|Warning|warning) ([0-9]+): (.+)"
 # Expresión regular para detectar fin del mensaje (6 dígitos numéricos al inicio o línea que empieza con *)
 PATRON_FIN="^[[:space:]]*([0-9]{6}|\*)"
 
