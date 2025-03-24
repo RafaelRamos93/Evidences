@@ -44,9 +44,11 @@ for archivo in "$DIRECTORIO"/*.txt; do
             ((LINE_NUM++))  # Contador de línea
             LINEA_LIMPIA="$(echo "$linea" | sed 's/^[[:space:]]*//')"  # Eliminar espacios iniciales
 
+            # Revisar si la línea es un warning que coincida con el patrón
             if [[ "$LINEA_LIMPIA" =~ $PATRON_WARNING ]]; then
                 # Si ya estábamos leyendo un warning, guardamos el anterior
                 if [[ $LEYENDO_WARNING -eq 1 ]]; then
+                    # Añadir el warning al JSON
                     WARNINGS_JSON+="        { \"linea\": $LINEA_INICIO, \"categoria\": \"$CATEGORIA_ACTUAL\", \"mensaje\": \"$(echo -e "$MENSAJE_WARNING" | sed ':a;N;$!ba;s/\n/\\n/g')\" },\n"
                     ((WARNINGS_POR_CATEGORIA["$CATEGORIA_ACTUAL"]++))
                 fi
@@ -57,9 +59,10 @@ for archivo in "$DIRECTORIO"/*.txt; do
                 CATEGORIA_ACTUAL="${BASH_REMATCH[2]}"
                 MENSAJE_WARNING="${BASH_REMATCH[3]}"
             
+            # Si ya estamos leyendo un warning y no es el final, continuamos el mensaje
             elif [[ $LEYENDO_WARNING -eq 1 ]]; then
-                # Si encontramos el patrón de fin, terminamos este warning
                 if [[ "$LINEA_LIMPIA" =~ $PATRON_FIN ]]; then
+                    # Si encontramos un patrón de fin, terminamos este warning
                     WARNINGS_JSON+="        { \"linea\": $LINEA_INICIO, \"categoria\": \"$CATEGORIA_ACTUAL\", \"mensaje\": \"$(echo -e "$MENSAJE_WARNING" | sed ':a;N;$!ba;s/\n/\\n/g')\" },\n"
                     ((WARNINGS_POR_CATEGORIA["$CATEGORIA_ACTUAL"]++))
                     LEYENDO_WARNING=0
@@ -69,7 +72,7 @@ for archivo in "$DIRECTORIO"/*.txt; do
             fi
         done < "$archivo"
 
-        # Guardar el último warning si el archivo termina con un mensaje en curso
+        # Si el archivo termina con un warning abierto, lo guardamos
         if [[ $LEYENDO_WARNING -eq 1 ]]; then
             WARNINGS_JSON+="        { \"linea\": $LINEA_INICIO, \"categoria\": \"$CATEGORIA_ACTUAL\", \"mensaje\": \"$(echo -e "$MENSAJE_WARNING" | sed ':a;N;$!ba;s/\n/\\n/g')\" },\n"
             ((WARNINGS_POR_CATEGORIA["$CATEGORIA_ACTUAL"]++))
