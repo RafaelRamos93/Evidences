@@ -7,10 +7,8 @@ INICIO=$(date +%s)
 DIRECTORIO="${1:-$(pwd)}"
 SALIDA_JSON="reporte_warnings.json"
 
-# Expresión regular para detectar warnings con número (ejemplo: WARNING 301: mensaje)
-PATRON_WARNING="(WARNING|Warning|warning) ([0-9]+): (.+)"
-# Expresión regular para detectar fin del mensaje (6 dígitos numéricos al inicio o línea que empieza con *)
-PATRON_FIN="^[[:space:]]*([0-9]{6}|\*)"
+# Expresión regular para detectar warnings con número (Ejemplo: WARNING 301: mensaje)
+PATRON_WARNING="(WARNING|Warning|warning) ([0-9]+):"
 
 # Inicializar estructura JSON
 echo "{" > "$SALIDA_JSON"
@@ -44,11 +42,10 @@ for archivo in "$DIRECTORIO"/*.txt; do
             ((LINE_NUM++))  # Contador de línea
             LINEA_LIMPIA="$(echo "$linea" | sed 's/^[[:space:]]*//')"  # Eliminar espacios iniciales
 
-            # Revisar si la línea es un warning que coincida con el patrón
+            # Detectar un warning nuevo
             if [[ "$LINEA_LIMPIA" =~ $PATRON_WARNING ]]; then
-                # Si ya estábamos leyendo un warning, guardamos el anterior
+                # Si ya estábamos leyendo un warning, lo guardamos antes de empezar otro
                 if [[ $LEYENDO_WARNING -eq 1 ]]; then
-                    # Añadir el warning al JSON
                     WARNINGS_JSON+="        { \"linea\": $LINEA_INICIO, \"categoria\": \"$CATEGORIA_ACTUAL\", \"mensaje\": \"$(echo -e "$MENSAJE_WARNING" | sed ':a;N;$!ba;s/\n/\\n/g')\" },\n"
                     ((WARNINGS_POR_CATEGORIA["$CATEGORIA_ACTUAL"]++))
                 fi
@@ -57,18 +54,11 @@ for archivo in "$DIRECTORIO"/*.txt; do
                 LEYENDO_WARNING=1
                 LINEA_INICIO=$LINE_NUM
                 CATEGORIA_ACTUAL="${BASH_REMATCH[2]}"
-                MENSAJE_WARNING="${BASH_REMATCH[3]}"
+                MENSAJE_WARNING="${LINEA_LIMPIA}"
             
-            # Si ya estamos leyendo un warning y no es el final, continuamos el mensaje
+            # Si ya estamos leyendo un warning, agregamos líneas adicionales al mensaje
             elif [[ $LEYENDO_WARNING -eq 1 ]]; then
-                if [[ "$LINEA_LIMPIA" =~ $PATRON_FIN ]]; then
-                    # Si encontramos un patrón de fin, terminamos este warning
-                    WARNINGS_JSON+="        { \"linea\": $LINEA_INICIO, \"categoria\": \"$CATEGORIA_ACTUAL\", \"mensaje\": \"$(echo -e "$MENSAJE_WARNING" | sed ':a;N;$!ba;s/\n/\\n/g')\" },\n"
-                    ((WARNINGS_POR_CATEGORIA["$CATEGORIA_ACTUAL"]++))
-                    LEYENDO_WARNING=0
-                else
-                    MENSAJE_WARNING+="\n$linea"
-                fi
+                MENSAJE_WARNING+="\n$linea"
             fi
         done < "$archivo"
 
