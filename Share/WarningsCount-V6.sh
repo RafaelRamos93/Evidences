@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Iniciar tiempo de ejecución
+INICIO=$(date +%s)
+
 # Definir el directorio a analizar, usa PWD si no se proporciona un argumento
 DIRECTORIO="${1:-$(pwd)}"
 SALIDA_JSON="reporte_warnings.json"
@@ -55,13 +58,12 @@ for archivo in "$DIRECTORIO"/*.txt; do
                 MENSAJE_WARNING="${BASH_REMATCH[3]}"
             
             elif [[ $LEYENDO_WARNING -eq 1 ]]; then
-                # Si encontramos el patrón de fin (ignorando espacios al inicio), terminamos este warning
+                # Si encontramos el patrón de fin, terminamos este warning
                 if [[ "$LINEA_LIMPIA" =~ $PATRON_FIN ]]; then
                     WARNINGS_JSON+="        { \"linea\": $LINEA_INICIO, \"categoria\": \"$CATEGORIA_ACTUAL\", \"mensaje\": \"$(echo -e "$MENSAJE_WARNING" | sed ':a;N;$!ba;s/\n/\\n/g')\" },\n"
                     ((WARNINGS_POR_CATEGORIA["$CATEGORIA_ACTUAL"]++))
                     LEYENDO_WARNING=0
                 else
-                    # Agregar la línea al mensaje acumulado
                     MENSAJE_WARNING+="\n$linea"
                 fi
             fi
@@ -73,22 +75,18 @@ for archivo in "$DIRECTORIO"/*.txt; do
             ((WARNINGS_POR_CATEGORIA["$CATEGORIA_ACTUAL"]++))
         fi
 
-        # Calcular el total de warnings por archivo
         for categoria in "${!WARNINGS_POR_CATEGORIA[@]}"; do
             ((TOTAL_GLOBAL_WARNINGS+=WARNINGS_POR_CATEGORIA["$categoria"]))
             ((WARNINGS_ENCONTRADOS+=WARNINGS_POR_CATEGORIA["$categoria"]))
         done
 
-        # Eliminar la última coma del JSON de warnings si hubo al menos uno
         if [[ $WARNINGS_ENCONTRADOS -gt 0 ]]; then
             WARNINGS_JSON=$(echo -e "$WARNINGS_JSON" | sed '$ s/,$//')
         fi
 
-        # Agregar los warnings al JSON
         echo -e "$WARNINGS_JSON" >> "$SALIDA_JSON"
         echo "      ]," >> "$SALIDA_JSON"
 
-        # Agregar la tabla de totales por categoría para este archivo
         echo "      \"totales_por_categoria\": {" >> "$SALIDA_JSON"
         for categoria in "${!WARNINGS_POR_CATEGORIA[@]}"; do
             echo "        \"$categoria\": ${WARNINGS_POR_CATEGORIA[$categoria]}," >> "$SALIDA_JSON"
@@ -96,24 +94,24 @@ for archivo in "$DIRECTORIO"/*.txt; do
         sed -i '$ s/,$//' "$SALIDA_JSON"
 
         echo "      }," >> "$SALIDA_JSON"
-
         echo "      \"total_warnings\": $WARNINGS_ENCONTRADOS" >> "$SALIDA_JSON"
         echo "    }," >> "$SALIDA_JSON"
     fi
 done
 
-# Eliminar la última coma en la lista de archivos si hubo al menos uno
 if [[ $ARCHIVOS_PROCESADOS -gt 0 ]]; then
     sed -i '$ s/,$//' "$SALIDA_JSON"
 fi
 
 echo "  ]," >> "$SALIDA_JSON"
-
-# Agregar resumen global (solo total de warnings)
 echo "  \"resumen_global\": {" >> "$SALIDA_JSON"
 echo "    \"total_warnings\": $TOTAL_GLOBAL_WARNINGS" >> "$SALIDA_JSON"
 echo "  }" >> "$SALIDA_JSON"
-
 echo "}" >> "$SALIDA_JSON"
 
+# Calcular tiempo de ejecución
+FIN=$(date +%s)
+TIEMPO_TOTAL=$((FIN - INICIO))
+
 echo "Reporte generado: $SALIDA_JSON"
+echo "Tiempo de ejecución: $TIEMPO_TOTAL segundos"
