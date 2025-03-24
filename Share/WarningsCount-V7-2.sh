@@ -5,7 +5,7 @@ INICIO=$(date +%s)
 
 # Definir el directorio a analizar, usa PWD si no se proporciona un argumento
 DIRECTORIO="${1:-$(pwd)}"
-SALIDA_JSON="reporte_warnings.json"
+SALIDA_JSON="reporte_warningsV7-2.json"
 
 # Expresión regular para detectar warnings con número (Ejemplo: WARNING 301: mensaje)
 PATRON_WARNING="(WARNING|Warning|warning) ([0-9]+):"
